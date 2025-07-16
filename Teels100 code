@@ -20,11 +20,19 @@ BOT_USERNAME = os.environ.get("BOT_USERNAME")
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 
+# আপনার চ্যানেল এবং ডেভেলপারের তথ্য
+MAIN_CHANNEL_LINK = os.environ.get("MAIN_CHANNEL_LINK")
+UPDATE_CHANNEL_LINK = os.environ.get("UPDATE_CHANNEL_LINK")
+DEVELOPER_USER_LINK = os.environ.get("DEVELOPER_USER_LINK")
+
 # --- প্রয়োজনীয় ভেরিয়েবলগুলো সেট করা হয়েছে কিনা তা পরীক্ষা করা ---
 required_vars = {
     "MONGO_URI": MONGO_URI, "BOT_TOKEN": BOT_TOKEN, "TMDB_API_KEY": TMDB_API_KEY,
     "ADMIN_CHANNEL_ID": ADMIN_CHANNEL_ID, "BOT_USERNAME": BOT_USERNAME,
     "ADMIN_USERNAME": ADMIN_USERNAME, "ADMIN_PASSWORD": ADMIN_PASSWORD,
+    "MAIN_CHANNEL_LINK": MAIN_CHANNEL_LINK,
+    "UPDATE_CHANNEL_LINK": UPDATE_CHANNEL_LINK,
+    "DEVELOPER_USER_LINK": DEVELOPER_USER_LINK,
 }
 
 missing_vars = [name for name, value in required_vars.items() if not value]
@@ -80,18 +88,17 @@ def delete_message_after_delay(chat_id, message_id):
     try:
         url = f"{TELEGRAM_API_URL}/deleteMessage"
         payload = {'chat_id': chat_id, 'message_id': message_id}
-        response = requests.post(url, json=payload)
-        if response.json().get('ok'):
-            print(f"Successfully deleted message {message_id} from chat {chat_id}")
-        else:
-            print(f"Failed to delete message: {response.text}")
+        requests.post(url, json=payload)
     except Exception as e:
         print(f"Error in delete_message_after_delay: {e}")
 
-# সিডিউলার তৈরি এবং চালু করা
 scheduler = BackgroundScheduler(daemon=True)
 scheduler.start()
 
+def escape_markdown(text: str) -> str:
+    """Helper function to escape telegram MarkdownV2 characters."""
+    escape_chars = r'_*[]()~`>#+-=|{}.!'
+    return re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', text)
 
 # ======================================================================
 # --- HTML টেমপ্লেট ---
@@ -133,7 +140,17 @@ index_html = """
   .poster-wrapper { position: relative; width: 100%; border-radius: 6px; overflow: hidden; background-color: #222; display: flex; flex-direction: column; }
   .movie-poster-container { position: relative; overflow: hidden; width:100%; flex-grow:1; aspect-ratio: 2 / 3; }
   .movie-poster { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
-  .poster-badge { position: absolute; top: 10px; left: 10px; background-color: var(--netflix-red); color: white; padding: 4px 8px; font-size: 0.7rem; font-weight: 700; border-radius: 4px; z-index: 3; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+  @keyframes rgb-glow {
+    0%, 100% { color: #ff5555; text-shadow: 0 0 5px #ff5555, 0 0 10px #ff5555; }
+    33% { color: #55ff55; text-shadow: 0 0 5px #55ff55, 0 0 10px #55ff55; }
+    66% { color: #55aaff; text-shadow: 0 0 5px #55aaff, 0 0 10px #55aaff; }
+  }
+  .poster-badge {
+    position: absolute; top: 18px; left: -35px; width: 140px; background: rgba(20, 20, 20, 0.8);
+    backdrop-filter: blur(5px); transform: rotate(-45deg); text-align: center; z-index: 5;
+    font-size: 0.75rem; font-weight: 700; padding: 4px 0; border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: rgb-glow 3s linear infinite;
+  }
   .rating-badge { position: absolute; top: 10px; right: 10px; background-color: rgba(0, 0, 0, 0.8); color: white; padding: 5px 10px; font-size: 0.8rem; font-weight: 700; border-radius: 20px; z-index: 3; display: flex; align-items: center; gap: 5px; backdrop-filter: blur(5px); }
   .rating-badge .fa-star { color: #f5c518; }
   .card-info-static { padding: 10px 8px; background-color: #1a1a1a; text-align: left; width: 100%; flex-shrink: 0; }
@@ -235,7 +252,7 @@ index_html = """
         <i class="fa-brands fa-telegram telegram-icon"></i>
         <h2>Join Our Telegram Channel</h2>
         <p>Get the latest movie updates, news, and direct download links right on your phone!</p>
-        <a href="https://t.me/+60goZWp-FpkxNzVl" target="_blank" class="telegram-join-button"><i class="fa-brands fa-telegram"></i> Join Main Channel</a>
+        <a href="{{ ad_settings.main_channel_link or '#' }}" target="_blank" class="telegram-join-button"><i class="fa-brands fa-telegram"></i> Join Main Channel</a>
     </div>
   {% endif %}
 </main>
@@ -294,7 +311,17 @@ detail_html = """
   .poster-wrapper { position: relative; width: 100%; border-radius: 6px; overflow: hidden; background-color: #222; display: flex; flex-direction: column; }
   .movie-poster-container { position: relative; overflow: hidden; width:100%; flex-grow:1; aspect-ratio: 2 / 3; }
   .movie-poster { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
-  .poster-badge { position: absolute; top: 10px; left: 10px; background-color: var(--netflix-red); color: white; padding: 4px 8px; font-size: 0.7rem; font-weight: 700; border-radius: 4px; z-index: 3; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+  @keyframes rgb-glow {
+    0%, 100% { color: #ff5555; text-shadow: 0 0 5px #ff5555, 0 0 10px #ff5555; }
+    33% { color: #55ff55; text-shadow: 0 0 5px #55ff55, 0 0 10px #55ff55; }
+    66% { color: #55aaff; text-shadow: 0 0 5px #55aaff, 0 0 10px #55aaff; }
+  }
+  .poster-badge {
+    position: absolute; top: 18px; left: -35px; width: 140px; background: rgba(20, 20, 20, 0.8);
+    backdrop-filter: blur(5px); transform: rotate(-45deg); text-align: center; z-index: 5;
+    font-size: 0.75rem; font-weight: 700; padding: 4px 0; border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: rgb-glow 3s linear infinite;
+  }
   .rating-badge { position: absolute; top: 10px; right: 10px; background-color: rgba(0, 0, 0, 0.8); color: white; padding: 5px 10px; font-size: 0.8rem; font-weight: 700; border-radius: 20px; z-index: 3; display: flex; align-items: center; gap: 5px; backdrop-filter: blur(5px); }
   .rating-badge .fa-star { color: #f5c518; }
   .card-info-static { padding: 10px 8px; background-color: #1a1a1a; text-align: left; width: 100%; flex-shrink: 0; }
@@ -402,7 +429,6 @@ watch_html = """
 </body></html>
 """
 
-# NEW CODE START: admin_html টেমপ্লেটে নতুন Danger Zone যোগ করা হয়েছে
 admin_html = """
 <!DOCTYPE html>
 <html><head><title>Admin Panel - MovieZone</title><meta name="viewport" content="width=device-width, initial-scale=1" /><style>
@@ -480,7 +506,6 @@ hr.section-divider { border: 0; height: 2px; background-color: var(--light-gray)
   </script>
 </body></html>
 """
-# NEW CODE END
 
 edit_html = """
 <!DOCTYPE html>
@@ -571,7 +596,6 @@ textarea { resize: vertical; min-height: 120px; } button[type="submit"] { backgr
 {% else %}<form method="post"><div class="form-group"><label for="type">বিষয় (Subject):</label><select name="type" id="type"><option value="Movie Request" {% if prefill_type == 'Problem Report' %}disabled{% endif %}>Movie/Series Request</option><option value="Problem Report" {% if prefill_type == 'Problem Report' %}selected{% endif %}>Report a Problem</option><option value="General Feedback">General Feedback</option></select></div><div class="form-group"><label for="content_title">মুভি/সিরিজের নাম (Title):</label><input type="text" name="content_title" id="content_title" value="{{ prefill_title }}" required></div><div class="form-group"><label for="message">আপনার বার্তা (Message):</label><textarea name="message" id="message" required></textarea></div><div class="form-group"><label for="email">আপনার ইমেইল (Optional):</label><input type="email" name="email" id="email"></div><input type="hidden" name="reported_content_id" value="{{ prefill_id }}"><button type="submit">Submit</button></form><a href="{{ url_for('home') }}" class="back-link">← Cancel</a>{% endif %}
 </div></body></html>
 """
-
 
 # ======================================================================
 # --- Helper Functions ---
@@ -808,7 +832,6 @@ def delete_movie(movie_id):
     movies.delete_one({"_id": ObjectId(movie_id)})
     return redirect(url_for('admin'))
 
-# NEW CODE START: সকল মুভি ডিলিট করার জন্য নতুন রুট
 @app.route('/admin/delete_all_movies')
 @requires_auth
 def delete_all_movies():
@@ -818,7 +841,6 @@ def delete_all_movies():
     except Exception as e:
         print(f"ERROR: Could not delete all movies. Reason: {e}")
     return redirect(url_for('admin'))
-# NEW CODE END
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
@@ -844,36 +866,57 @@ def telegram_webhook():
         if str(post.get('chat', {}).get('id')) != ADMIN_CHANNEL_ID: return jsonify(status='ok', reason='not_admin_channel')
         file = post.get('video') or post.get('document')
         if not (file and file.get('file_name')): return jsonify(status='ok', reason='no_file_in_post')
+        
         filename = file.get('file_name')
         parsed_info = parse_filename(filename)
+        
         if not parsed_info or not parsed_info.get('title'): return jsonify(status='ok', reason='parsing_failed')
+        
+        poster_badge = None
+        quality_tags = ['HDRip', 'WEB-DL', 'WEBRip', 'BluRay', 'HDTS', 'HDCAM', 'CAM', 'TS', 'HD']
+        badge_regex = r'\b(' + '|'.join(quality_tags) + r')\b'
+        badge_match = re.search(badge_regex, filename, re.IGNORECASE)
+        if badge_match:
+            poster_badge = badge_match.group(1).upper()
+
         quality_match = re.search(r'(\d{3,4})p', filename, re.IGNORECASE)
         quality = quality_match.group(1) + "p" if quality_match else "HD"
+        
         tmdb_data = get_tmdb_details_from_api(parsed_info['title'], parsed_info['type'], parsed_info.get('year'))
         if not tmdb_data or not tmdb_data.get("tmdb_id"): return jsonify(status='ok', reason='no_tmdb_data_or_id')
+        
         tmdb_id = tmdb_data.get("tmdb_id")
         new_languages = parsed_info.get('languages', [])
+        
+        update_doc = {"$set": {}}
+        if poster_badge:
+            update_doc["$set"]["poster_badge"] = poster_badge
+        
         if parsed_info['type'] == 'series':
             existing_series = movies.find_one({"tmdb_id": tmdb_id})
             new_episode = {"season": parsed_info['season'], "episode_number": parsed_info['episode'], "message_id": post['message_id'], "quality": quality}
+            
             if existing_series:
                 movies.update_one({"_id": existing_series['_id']}, {"$pull": {"episodes": {"season": new_episode['season'], "episode_number": new_episode['episode_number']}}})
-                update_query = {"$push": {"episodes": new_episode}}
-                if new_languages: update_query["$addToSet"] = {"languages": {"$each": new_languages}}
-                movies.update_one({"_id": existing_series['_id']}, update_query)
+                update_doc["$push"] = {"episodes": new_episode}
+                if new_languages: update_doc["$addToSet"] = {"languages": {"$each": new_languages}}
+                movies.update_one({"_id": existing_series['_id']}, update_doc)
             else:
                 series_doc = { **tmdb_data, "type": "series", "is_trending": False, "is_coming_soon": False, "episodes": [new_episode], "languages": new_languages }
+                if poster_badge: series_doc["poster_badge"] = poster_badge
                 movies.insert_one(series_doc)
-        else:
+        else: # Movie
             existing_movie = movies.find_one({"tmdb_id": tmdb_id})
             new_file = {"quality": quality, "message_id": post['message_id']}
+            
             if existing_movie:
                 movies.update_one({"_id": existing_movie['_id']}, {"$pull": {"files": {"quality": new_file['quality']}}})
-                update_query = {"$push": {"files": new_file}}
-                if new_languages: update_query["$addToSet"] = {"languages": {"$each": new_languages}}
-                movies.update_one({"_id": existing_movie['_id']}, update_query)
+                update_doc["$push"] = {"files": new_file}
+                if new_languages: update_doc["$addToSet"] = {"languages": {"$each": new_languages}}
+                movies.update_one({"_id": existing_movie['_id']}, update_doc)
             else:
                 movie_doc = { **tmdb_data, "type": "movie", "is_trending": False, "is_coming_soon": False, "files": [new_file], "languages": new_languages }
+                if poster_badge: movie_doc["poster_badge"] = poster_badge
                 movies.insert_one(movie_doc)
 
     elif 'message' in data:
@@ -887,28 +930,64 @@ def telegram_webhook():
                     payload_parts = parts[1].split('_')
                     doc_id_str = payload_parts[0]
                     content = movies.find_one({"_id": ObjectId(doc_id_str)})
-                    if not content: return requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': "Content not found."})
+                    if not content:
+                        requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': "Content not found."})
+                        return jsonify(status='ok')
+
                     message_to_copy_id = None
+                    file_info_text = ""
+                    
                     if content.get('type') == 'series' and len(payload_parts) == 3:
                         s_num, e_num = int(payload_parts[1]), int(payload_parts[2])
                         episode = next((ep for ep in content.get('episodes', []) if ep.get('season') == s_num and ep.get('episode_number') == e_num), None)
-                        if episode: message_to_copy_id = episode.get('message_id')
+                        if episode: 
+                            message_to_copy_id = episode.get('message_id')
+                            file_info_text = f"S{s_num:02d}E{e_num:02d} \({escape_markdown(episode.get('quality', ''))}\)"
                     elif content.get('type') == 'movie' and len(payload_parts) == 2:
-                        file = next((f for f in content.get('files', []) if f.get('quality') == payload_parts[1]), None)
-                        if file: message_to_copy_id = file.get('message_id')
+                        quality_from_payload = payload_parts[1]
+                        file = next((f for f in content.get('files', []) if f.get('quality') == quality_from_payload), None)
+                        if file: 
+                            message_to_copy_id = file.get('message_id')
+                            file_info_text = f"\({escape_markdown(file.get('quality', ''))}\)"
                     
                     if message_to_copy_id:
-                        res = requests.post(f"{TELEGRAM_API_URL}/copyMessage", json={'chat_id': chat_id, 'from_chat_id': ADMIN_CHANNEL_ID, 'message_id': message_to_copy_id}).json()
+                        escaped_title = escape_markdown(content['title'])
+                        
+                        caption_text = (
+                            f"🎬 *{escaped_title}* {file_info_text}\n\n"
+                            f"✅ *Successfully Sent To Your PM*\n\n"
+                            f"🔰 Join Our Main Channel\n"
+                            f"➡️ [CTG Movie Main]({MAIN_CHANNEL_LINK})\n\n"
+                            f"📢 Join Our Update Channel\n"
+                            f"➡️ [CTG Movie Official]({UPDATE_CHANNEL_LINK})\n\n"
+                            f"💬 For Any Help or Request\n"
+                            f"➡️ [Contact Developer]({DEVELOPER_USER_LINK})"
+                        )
+                        
+                        payload = {
+                            'chat_id': chat_id,
+                            'from_chat_id': ADMIN_CHANNEL_ID,
+                            'message_id': message_to_copy_id,
+                            'caption': caption_text,
+                            'parse_mode': 'MarkdownV2'
+                        }
+                        
+                        res = requests.post(f"{TELEGRAM_API_URL}/copyMessage", json=payload).json()
+                        
                         if res.get('ok'):
                             new_msg_id = res['result']['message_id']
                             run_time = datetime.now() + timedelta(minutes=30)
                             scheduler.add_job(func=delete_message_after_delay, trigger='date', run_date=run_time, args=[chat_id, new_msg_id], id=f'del_{chat_id}_{new_msg_id}', replace_existing=True)
-                        else: requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': "Error sending file. It might have been deleted from the channel."})
-                    else: requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': "Requested file or episode not found."})
+                        else: 
+                            print(f"Failed to copy message: {res.get('description')}")
+                            requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': "Error sending file. It might have been deleted from the channel."})
+                    else: 
+                        requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': "Requested file or episode not found."})
                 except Exception as e:
                     print(f"Error processing /start command: {e}")
                     requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': "An unexpected error occurred."})
-            else: requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': "আমাদের ওয়েবসাইটে আপনাকে স্বাগতম."})
+            else: 
+                requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': "Welcome to our website! Browse and find your favorite content."})
 
     return jsonify(status='ok')
 
