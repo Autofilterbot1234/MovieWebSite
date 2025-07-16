@@ -402,6 +402,7 @@ watch_html = """
 </body></html>
 """
 
+# NEW CODE START: admin_html টেমপ্লেটে নতুন Danger Zone যোগ করা হয়েছে
 admin_html = """
 <!DOCTYPE html>
 <html><head><title>Admin Panel - MovieZone</title><meta name="viewport" content="width=device-width, initial-scale=1" /><style>
@@ -421,6 +422,8 @@ th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--li
 .edit-btn { background: #007bff; } .delete-btn { background: #dc3545; }
 .dynamic-item { border: 1px solid var(--light-gray); padding: 15px; margin-bottom: 15px; border-radius: 5px; }
 hr.section-divider { border: 0; height: 2px; background-color: var(--light-gray); margin: 40px 0; }
+.danger-zone { border: 2px solid var(--netflix-red); padding: 20px; border-radius: 8px; margin-top: 20px; text-align: center; }
+.danger-zone-btn { background: #dc3545; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; }
 </style><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@400;700&display=swap" rel="stylesheet"></head>
 <body>
   <h2>বিজ্ঞাপন পরিচালনা (Ad Management)</h2>
@@ -458,6 +461,13 @@ hr.section-divider { border: 0; height: 2px; background-color: var(--light-gray)
     <tr><td colspan="3" style="text-align: center;">No content found.</td></tr>
     {% endfor %}
   </tbody></table>
+  
+  <div class="danger-zone">
+      <h3>DANGER ZONE</h3>
+      <p style="margin-bottom: 15px;">This will permanently delete all movies and series from the database. This action cannot be undone.</p>
+      <a href="{{ url_for('delete_all_movies') }}" class="danger-zone-btn" onclick="return confirm('ARE YOU ABSOLUTELY SURE?\\nThis will delete ALL content from the database permanently.\\nThis action cannot be undone.');">Delete All Content</a>
+  </div>
+
   <hr class="section-divider">
   <h2>User Feedback / Reports</h2>
   {% if feedback_list %}<table><thead><tr><th>Date</th><th>Type</th><th>Title</th><th>Message</th><th>Email</th><th>Action</th></tr></thead><tbody>{% for item in feedback_list %}<tr><td style="min-width: 150px;">{{ item.timestamp.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ item.type }}</td><td>{{ item.content_title }}</td><td style="white-space: pre-wrap; min-width: 300px;">{{ item.message }}</td><td>{{ item.email or 'N/A' }}</td><td><a href="{{ url_for('delete_feedback', feedback_id=item._id) }}" class="delete-btn" onclick="return confirm('Delete this feedback?');">Delete</a></td></tr>{% endfor %}</tbody></table>{% else %}<p>No new feedback or reports.</p>{% endif %}
@@ -470,6 +480,7 @@ hr.section-divider { border: 0; height: 2px; background-color: var(--light-gray)
   </script>
 </body></html>
 """
+# NEW CODE END
 
 edit_html = """
 <!DOCTYPE html>
@@ -796,6 +807,18 @@ def edit_movie(movie_id):
 def delete_movie(movie_id):
     movies.delete_one({"_id": ObjectId(movie_id)})
     return redirect(url_for('admin'))
+
+# NEW CODE START: সকল মুভি ডিলিট করার জন্য নতুন রুট
+@app.route('/admin/delete_all_movies')
+@requires_auth
+def delete_all_movies():
+    try:
+        result = movies.delete_many({})
+        print(f"DELETED: {result.deleted_count} documents from the 'movies' collection by admin.")
+    except Exception as e:
+        print(f"ERROR: Could not delete all movies. Reason: {e}")
+    return redirect(url_for('admin'))
+# NEW CODE END
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
