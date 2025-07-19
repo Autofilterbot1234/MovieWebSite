@@ -99,7 +99,7 @@ def escape_markdown(text: str) -> str:
 # ======================================================================
 # --- HTML টেমপ্লেট ---
 # ======================================================================
-# (HTML টেমপ্লেট কোড এখানে অপরিবর্তিত থাকবে)
+
 index_html = """
 <!DOCTYPE html>
 <html lang="en">
@@ -253,7 +253,23 @@ index_html = """
     </div>
   {% endif %}
 </main>
-<nav class="bottom-nav"><a href="{{ url_for('home') }}" class="nav-item {% if request.endpoint == 'home' %}active{% endif %}"><i class="fas fa-home"></i><span>Home</span></a><a href="{{ url_for('genres_page') }}" class="nav-item {% if request.endpoint == 'genres_page' %}active{% endif %}"><i class="fas fa-layer-group"></i><span>Genres</span></a><a href="{{ url_for('contact') }}" class="nav-item {% if request.endpoint == 'contact' %}active{% endif %}"><i class="fas fa-envelope"></i><span>Request</span></a></nav>
+<nav class="bottom-nav">
+    <a href="{{ url_for('home') }}" class="nav-item {% if request.endpoint == 'home' %}active{% endif %}">
+        <i class="fas fa-home"></i><span>Home</span>
+    </a>
+    <a href="{{ url_for('movies_only') }}" class="nav-item {% if request.endpoint == 'movies_only' %}active{% endif %}">
+        <i class="fas fa-film"></i><span>Movies</span>
+    </a>
+    <a href="{{ url_for('webseries') }}" class="nav-item {% if request.endpoint == 'webseries' %}active{% endif %}">
+        <i class="fas fa-tv"></i><span>Series</span>
+    </a>
+    <a href="{{ url_for('genres_page') }}" class="nav-item {% if request.endpoint == 'genres_page' %}active{% endif %}">
+        <i class="fas fa-layer-group"></i><span>Genres</span>
+    </a>
+    <a href="{{ url_for('contact') }}" class="nav-item {% if request.endpoint == 'contact' %}active{% endif %}">
+        <i class="fas fa-envelope"></i><span>Request</span>
+    </a>
+</nav>
 <script>
     const nav = document.querySelector('.main-nav');
     window.addEventListener('scroll', () => { window.scrollY > 50 ? nav.classList.add('scrolled') : nav.classList.remove('scrolled'); });
