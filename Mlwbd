@@ -182,7 +182,7 @@ def post_to_public_channel(content_id, post_type='content', season_num=None):
         print(f"FATAL ERROR in post_to_public_channel: {e}")
 
 # ======================================================================
-# --- HTML টেমপ্লেট ---
+# --- HTML টেমপ্লেট (চূড়ান্ত সংস্করণ) ---
 # ======================================================================
 index_html = """
 <!DOCTYPE html>
@@ -198,6 +198,8 @@ index_html = """
   body { font-family: 'Roboto', sans-serif; background-color: var(--netflix-black); color: var(--text-light); overflow-x: hidden; }
   a { text-decoration: none; color: inherit; }
   ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: #222; } ::-webkit-scrollbar-thumb { background: #555; } ::-webkit-scrollbar-thumb:hover { background: var(--netflix-red); }
+  
+  /* ডেস্কটপ ডিজাইন */
   .main-nav { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; z-index: 100; transition: background-color 0.3s ease; background: linear-gradient(to bottom, rgba(0,0,0,0.8) 10%, rgba(0,0,0,0)); }
   .main-nav.scrolled { background-color: var(--netflix-black); }
   .logo { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--netflix-red); font-weight: 700; letter-spacing: 1px; }
@@ -221,17 +223,7 @@ index_html = """
   .poster-wrapper { position: relative; width: 100%; border-radius: 6px; overflow: hidden; background-color: #222; display: flex; flex-direction: column; }
   .movie-poster-container { position: relative; overflow: hidden; width:100%; flex-grow:1; aspect-ratio: 2 / 3; }
   .movie-poster { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
-  @keyframes rgb-glow {
-    0%, 100% { color: #ff5555; text-shadow: 0 0 5px #ff5555, 0 0 10px #ff5555; }
-    33% { color: #55ff55; text-shadow: 0 0 5px #55ff55, 0 0 10px #55ff55; }
-    66% { color: #55aaff; text-shadow: 0 0 5px #55aaff, 0 0 10px #55aaff; }
-  }
-  .poster-badge {
-    position: absolute; top: 18px; left: -35px; width: 140px; background: rgba(20, 20, 20, 0.8);
-    backdrop-filter: blur(5px); transform: rotate(-45deg); text-align: center; z-index: 5;
-    font-size: 0.75rem; font-weight: 700; padding: 4px 0; border: 1px solid rgba(255, 255, 255, 0.2);
-    animation: rgb-glow 3s linear infinite;
-  }
+  .poster-badge { position: absolute; top: 18px; left: -35px; width: 140px; background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(5px); transform: rotate(-45deg); text-align: center; z-index: 5; font-size: 0.75rem; font-weight: 700; padding: 4px 0; border: 1px solid rgba(255, 255, 255, 0.2); }
   .rating-badge { position: absolute; top: 10px; right: 10px; background-color: rgba(0, 0, 0, 0.8); color: white; padding: 5px 10px; font-size: 0.8rem; font-weight: 700; border-radius: 20px; z-index: 3; display: flex; align-items: center; gap: 5px; backdrop-filter: blur(5px); }
   .rating-badge .fa-star { color: #f5c518; }
   .card-info-static { padding: 10px 8px; background-color: #1a1a1a; text-align: left; width: 100%; flex-shrink: 0; }
@@ -245,25 +237,32 @@ index_html = """
   .category-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
   .category-title { font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 1.6rem; margin: 0; }
   .see-all-link { color: var(--text-dark); font-weight: 700; font-size: 0.9rem; }
-  .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height); background-color: #181818; border-top: 1px solid #282828; justify-content: space-around; align-items: center; z-index: 200; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dark); font-size: 10px; flex-grow: 1; padding: 5px 0; transition: color 0.2s ease; }
-  .nav-item i { font-size: 20px; margin-bottom: 4px; } .nav-item.active { color: var(--text-light); } .nav-item.active i { color: var(--netflix-red); }
+  .bottom-nav { display: none; } /* ডেস্কটপে হাইড */
   .ad-container { margin: 40px 0; display: flex; justify-content: center; align-items: center; }
-  .telegram-join-section { background-color: #181818; padding: 40px 20px; text-align: center; margin: 50px -50px -50px -50px; }
+  .telegram-join-section { background-color: #181818; padding: 40px 20px; text-align: center; margin: 50px -50px 0px -50px; }
   .telegram-join-section .telegram-icon { font-size: 4rem; color: #2AABEE; margin-bottom: 15px; } .telegram-join-section h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--text-light); margin-bottom: 10px; }
   .telegram-join-section p { font-size: 1.1rem; color: var(--text-dark); max-width: 600px; margin: 0 auto 25px auto; }
   .telegram-join-button { display: inline-flex; align-items: center; gap: 10px; background-color: #2AABEE; color: white; padding: 12px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: 700; transition: all 0.2s ease; }
   .telegram-join-button:hover { transform: scale(1.05); background-color: #1e96d1; } .telegram-join-button i { font-size: 1.3rem; }
+  
+  /* মোবাইল ডিজাইন ( <= 768px) */
   @media (max-width: 768px) {
-      body { padding-bottom: var(--nav-height); } .main-nav { padding: 10px 15px; } main { padding: 0 15px; } .logo { font-size: 24px; } .search-input { width: 150px; }
-      .tags-section { padding: 80px 15px 15px 15px; } .tag-link { padding: 6px 15px; font-size: 0.8rem; } .hero-section { height: 60vh; margin: 0 -15px;}
-      .hero-slide { padding: 15px; align-items: center; } .hero-content { max-width: 90%; text-align: center; } .hero-title { font-size: 2.8rem; } .hero-overview { display: none; }
-      .category-section { margin: 25px 0; } .category-title { font-size: 1.2rem; }
-      .category-grid, .full-page-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px 10px; }
-      .full-page-grid-container { padding-top: 80px; } .full-page-grid-title { font-size: 1.8rem; }
-      .bottom-nav { display: flex; } .ad-container { margin: 25px 0; }
-      .telegram-join-section { margin: 50px -15px -30px -15px; }
-      .telegram-join-section h2 { font-size: 2rem; } .telegram-join-section p { font-size: 1rem; }
+      body { padding-bottom: var(--nav-height); }
+      .main-nav, .hero-section, .tags-section, .telegram-join-section, .card-info-static { display: none; }
+      .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height); background-color: #181818; border-top: 1px solid #282828; justify-content: space-around; align-items: center; z-index: 200; }
+      .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dark); font-size: 10px; flex-grow: 1; padding: 5px 0; transition: color 0.2s ease; }
+      .nav-item i { font-size: 20px; margin-bottom: 4px; } .nav-item.active { color: var(--text-light); } .nav-item.active i { color: var(--netflix-red); }
+      main { padding: 0 15px; }
+      .category-section { margin-top: 30px; }
+      .category-title { font-size: 1.2rem; }
+      
+      /* --- চূড়ান্ত গ্রিড লেআউট (পুরোনো কোডের মতো) --- */
+      .category-grid, .full-page-grid {
+          grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+          gap: 15px 10px;
+      }
+      .full-page-grid-container { padding-top: 80px; padding-bottom: 20px; } .full-page-grid-title { font-size: 1.8rem; }
+      .ad-container { margin: 25px 0; }
   }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
@@ -275,8 +274,8 @@ index_html = """
     <a href="{{ url_for('movie_detail', movie_id=m._id) }}" class="movie-card">
       <div class="poster-wrapper">
         <div class="movie-poster-container">
-           <img class="movie-poster" loading="lazy" src="{{ m.poster or 'https://via.placeholder.com/400x600.png?text=No+Image' }}" alt="{{ m.title }}">
-           {% if m.poster_badge %}<div class="poster-badge">{{ m.poster_badge }}</div>{% endif %}
+           <img class="movie-poster" loading="lazy" src="{{ (m.poster | replace('w500', 'w342')) if m.poster else 'https://via.placeholder.com/400x600.png?text=No+Image' }}" alt="{{ m.title }}">
+           {% if m.poster_badge %}<div class="poster-badge" style="font-size: 0.7rem; width: 110px; top:12px; left: -25px;">{{ m.poster_badge }}</div>{% endif %}
            {% if m.vote_average and m.vote_average > 0 %}<div class="rating-badge"><i class="fas fa-star"></i> {{ "%.1f"|format(m.vote_average) }}</div>{% endif %}
         </div>
         <div class="card-info-static">
@@ -415,8 +414,7 @@ detail_html = """
   .poster-wrapper { position: relative; width: 100%; border-radius: 6px; overflow: hidden; background-color: #222; display: flex; flex-direction: column; }
   .movie-poster-container { position: relative; overflow: hidden; width:100%; flex-grow:1; aspect-ratio: 2 / 3; }
   .movie-poster { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
-  @keyframes rgb-glow { 0%, 100% { color: #ff5555; text-shadow: 0 0 5px #ff5555, 0 0 10px #ff5555; } 33% { color: #55ff55; text-shadow: 0 0 5px #55ff55, 0 0 10px #55ff55; } 66% { color: #55aaff; text-shadow: 0 0 5px #55aaff, 0 0 10px #55aaff; } }
-  .poster-badge { position: absolute; top: 18px; left: -35px; width: 140px; background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(5px); transform: rotate(-45deg); text-align: center; z-index: 5; font-size: 0.75rem; font-weight: 700; padding: 4px 0; border: 1px solid rgba(255, 255, 255, 0.2); animation: rgb-glow 3s linear infinite; }
+  .poster-badge { position: absolute; top: 18px; left: -35px; width: 140px; background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(5px); transform: rotate(-45deg); text-align: center; z-index: 5; font-size: 0.75rem; font-weight: 700; padding: 4px 0; border: 1px solid rgba(255, 255, 255, 0.2); }
   .rating-badge { position: absolute; top: 10px; right: 10px; background-color: rgba(0, 0, 0, 0.8); color: white; padding: 5px 10px; font-size: 0.8rem; font-weight: 700; border-radius: 20px; z-index: 3; display: flex; align-items: center; gap: 5px; backdrop-filter: blur(5px); }
   .rating-badge .fa-star { color: #f5c518; }
   .card-info-static { padding: 10px 8px; background-color: #1a1a1a; text-align: left; width: 100%; flex-shrink: 0; }
@@ -564,7 +562,6 @@ genres_html = """
 </body></html>
 """
 
-# --- নতুন টেমপ্লেট: লিংক পেজের জন্য ---
 go_link_html = """
 <!DOCTYPE html>
 <html lang="en">
@@ -679,7 +676,6 @@ go_link_html = """
                 linkButton.classList.add('enabled');
                 linkButton.href = destinationUrl;
                 
-                // ব্যবহারকারীকে স্বয়ংক্রিয়ভাবে রিডাইরেক্ট করা হবে
                 window.location.href = destinationUrl;
             }
         }, 1000);
@@ -985,7 +981,7 @@ def movie_detail(movie_id):
         if not movie: return "Content not found", 404
         related_movies = []
         if movie.get("genres"):
-            related_movies = list(movies.find({"genres": {"$in": movie["genres"]}, "_id": {"$ne": obj_id}}).limit(12))
+            related_movies = list(movies.find({"genres": {"$in": movie["genres"]}, "_id": {"$ne": obj_id}, "is_coming_soon": {"$ne": True}}).limit(12))
         return render_template_string(detail_html, movie=movie, trailer_key=movie.get("trailer_key"), related_movies=process_movie_list(related_movies))
     except Exception as e:
         print(f"Error in movie_detail route: {e}")
@@ -1022,7 +1018,6 @@ def recently_added_all(): return render_full_list(list(movies.find({"is_coming_s
 # --- Admin and Other Routes ---
 # ======================================================================
 
-# --- নতুন রুট: লিংক পেজের জন্য ---
 @app.route('/go')
 def go_to_link():
     destination_url = request.args.get('url')
@@ -1080,7 +1075,6 @@ def save_ads():
         "social_bar_code": request.form.get("social_bar_code", ""), 
         "banner_ad_code": request.form.get("banner_ad_code", ""), 
         "native_banner_code": request.form.get("native_banner_code", ""),
-        # --- পরিবর্তন এখানে: নতুন বিজ্ঞাপন কোড সেভ করা ---
         "link_page_ad_1": request.form.get("link_page_ad_1", ""),
         "link_page_ad_2": request.form.get("link_page_ad_2", ""),
     }
@@ -1111,7 +1105,7 @@ def edit_movie(movie_id):
             update_data["files"] = [{"quality": q, "message_id": int(mid)} for q, mid in zip(request.form.getlist('telegram_quality[]'), request.form.getlist('telegram_message_id[]')) if q and mid]
             movies.update_one({"_id": obj_id}, {"$set": update_data, "$unset": {"episodes": "", "season_packs": ""}})
         else: # Series
-            update_data["episodes"] = [{"season": int(s), "episode_number": int(e), "title": t, "watch_links": parse_links_from_string(wl), "download_links": parse_links_from_string(dl), "message_id": int(m) if m else None} for s, e, t, wl, dl, m in zip(request.form.getlist('episode_season[]'), request.form.getlist('episode_number[]'), request.form.getlist('episode_title[]'), request.form.getlist('episode_watch_links_str[]'), request.form.getlist('episode_download_links_str[]'), request.form.getlist('episode_message_id[]'))]
+            update_data["episodes"] = [{"season": int(s), "episode_number": int(e), "title": t, "watch_links": parse_links_from_string(wl), "download_links": parse_links_from_string(dl), "message_id": int(m) if m and m.isdigit() else None} for s, e, t, wl, dl, m in zip(request.form.getlist('episode_season[]'), request.form.getlist('episode_number[]'), request.form.getlist('episode_title[]'), request.form.getlist('episode_watch_links_str[]'), request.form.getlist('episode_download_links_str[]'), request.form.getlist('episode_message_id[]'))]
             update_data["season_packs"] = [{
                 "season": int(s),
                 "watch_links": parse_links_from_string(wl),
@@ -1167,20 +1161,18 @@ def delete_feedback(feedback_id):
 
 
 # ======================================================================
-# --- নতুন Helper ফাংশন: সিরিজ খুঁজে বের করা বা তৈরি করা ---
+# --- Helper ফাংশন: সিরিজ খুঁজে বের করা বা তৈরি করা ---
 # ======================================================================
 def find_or_create_series(user_title, year, badge, chat_id):
     """
     ডাটাবেজে সিরিজ খুঁজে বের করে। না পেলে TMDb থেকে তথ্য নিয়ে নতুন সিরিজ তৈরি করে।
     Returns the series document or None if creation fails.
     """
-    # প্রথমে ডাটাবেজে সিরিজটি খোঁজা হবে
     series = movies.find_one({"title": {"$regex": f"^{re.escape(user_title)}$", "$options": "i"}, "type": "series"})
     if series:
         print(f"INFO: Found existing series '{user_title}' in DB.")
         return series
 
-    # যদি সিরিজটি ডাটাবেজে না থাকে
     print(f"INFO: Series '{user_title}' not in DB. Creating new entry.")
     requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': f"⏳ Series page for `{user_title}` not found. Creating it now...", 'parse_mode': 'Markdown'})
     
@@ -1210,26 +1202,24 @@ def find_or_create_series(user_title, year, badge, chat_id):
         print(f"SUCCESS: Created new series '{user_title}' and posted to channel.")
         requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': f"✅ Successfully created series page for `{user_title}`.", 'parse_mode': 'Markdown'})
     
-    # সর্বশেষ আপডেটেড ডকুমেন্টটি ডাটাবেজ থেকে আবার আনা হচ্ছে
     return movies.find_one({"tmdb_id": tmdb_data["tmdb_id"], "type": "series"})
 
 
 # ======================================================================
-# --- Webhook Route (FINAL VERSION) ---
+# --- Webhook Route ---
 # ======================================================================
 @app.route('/webhook', methods=['POST'])
 def telegram_webhook():
     data = request.get_json()
 
     if 'channel_post' in data:
-        pass # চ্যানেল পোস্ট এখানে হ্যান্ডেল করা হয় না
+        pass 
 
     elif 'message' in data:
         message = data['message']
         chat_id = message['chat']['id']
         text = message.get('text', '').strip()
         
-        # --- Start command for regular users ---
         if text.startswith('/start'):
             payload_str = text.split(' ', 1)[-1]
             if payload_str != '/start':
@@ -1268,11 +1258,9 @@ def telegram_webhook():
             
             return jsonify(status='ok')
 
-        # --- Admin-only commands ---
         if str(chat_id) not in ADMIN_USER_IDS:
             return jsonify(status='ok')
         
-        # --- /add command (for Movies) ---
         if text.startswith('/add '):
             try:
                 parts = text.split('/add ', 1)[1].split('|')
@@ -1314,7 +1302,6 @@ def telegram_webhook():
                           f"*Separate multiple links with commas. E.g., `Hindi: url, Bangla: url`*")
             requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': reply_text, 'parse_mode': 'Markdown'})
 
-        # --- নতুন: /addep command (for Series Episodes) ---
         elif text.startswith('/addep '):
             try:
                 parts = text.split('/addep ', 1)[1].split('|')
@@ -1332,10 +1319,9 @@ def telegram_webhook():
                 if not se_match: raise ValueError("Invalid S/E format. Use S01E01.")
                 season_num, episode_num = int(se_match.group(1)), int(se_match.group(2))
 
-                # সিরিজ খুঁজে বের করা বা তৈরি করা
                 series = find_or_create_series(user_title, year, badge, chat_id)
                 if not series:
-                    return jsonify(status='ok') # Helper function already sent an error message
+                    return jsonify(status='ok') 
 
                 series_id = series['_id']
                 new_episode = {
@@ -1346,7 +1332,6 @@ def telegram_webhook():
                     "download_links": parse_links_from_string(download_links_str), 
                     "message_id": None
                 }
-                # পুরোনো এপিসোড থাকলে ডিলেট করে নতুনটা যোগ করা
                 movies.update_one({"_id": series_id}, {"$pull": {"episodes": {"season": season_num, "episode_number": episode_num}}})
                 movies.update_one({"_id": series_id}, {"$push": {"episodes": new_episode}})
                 
@@ -1360,7 +1345,6 @@ def telegram_webhook():
                           f"`/addep Series Name (Year) [Language] | S01E01 | Watch Links | Download Links`")
             requests.get(f"{TELEGRAM_API_URL}/sendMessage", params={'chat_id': chat_id, 'text': reply_text, 'parse_mode': 'Markdown'})
 
-        # --- নতুন: /addpack command (for Season Packs) ---
         elif text.startswith('/addpack '):
             try:
                 parts = text.split('/addpack ', 1)[1].split('|')
@@ -1378,7 +1362,6 @@ def telegram_webhook():
                 if not se_match: raise ValueError("Invalid season format. Use S01.")
                 season_num = int(se_match.group(1))
 
-                # সিরিজ খুঁজে বের করা বা তৈরি করা
                 series = find_or_create_series(user_title, year, badge, chat_id)
                 if not series:
                     return jsonify(status='ok')
@@ -1390,7 +1373,6 @@ def telegram_webhook():
                     "message_id": None
                 }
                 
-                # পুরোনো প্যাক থাকলে ডিলেট করে নতুনটা যোগ করা
                 movies.update_one({"_id": series['_id']}, {"$pull": {"season_packs": {"season": season_num}}})
                 movies.update_one({"_id": series['_id']}, {"$push": {"season_packs": new_pack}})
                 
