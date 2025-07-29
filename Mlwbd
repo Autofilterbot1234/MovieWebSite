@@ -199,7 +199,7 @@ index_html = """
   a { text-decoration: none; color: inherit; }
   ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: #222; } ::-webkit-scrollbar-thumb { background: #555; } ::-webkit-scrollbar-thumb:hover { background: var(--netflix-red); }
   
-  /* ডেস্কটপ ডিজাইন */
+  /* --- ডেস্কটপ ডিজাইন (Default) --- */
   .main-nav { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 50px; display: flex; justify-content: space-between; align-items: center; z-index: 100; transition: background-color 0.3s ease; background: linear-gradient(to bottom, rgba(0,0,0,0.8) 10%, rgba(0,0,0,0)); }
   .main-nav.scrolled { background-color: var(--netflix-black); }
   .logo { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--netflix-red); font-weight: 700; letter-spacing: 1px; }
@@ -229,6 +229,7 @@ index_html = """
   .card-info-static { padding: 10px 8px; background-color: #1a1a1a; text-align: left; width: 100%; flex-shrink: 0; }
   .card-info-title { font-size: 0.9rem; font-weight: 500; color: var(--text-light); margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .card-info-meta { font-size: 0.75rem; color: var(--text-dark); margin: 0; }
+  .card-info-mobile { display: none; }
   @media (hover: hover) { .movie-card:hover { transform: scale(1.05); z-index: 10; box-shadow: 0 0 20px rgba(229, 9, 20, 0.5); } .movie-card:hover .movie-poster { transform: scale(1.1); } }
   .full-page-grid-container { padding-top: 100px; padding-bottom: 50px; }
   .full-page-grid-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 30px; }
@@ -237,7 +238,7 @@ index_html = """
   .category-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
   .category-title { font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 1.6rem; margin: 0; }
   .see-all-link { color: var(--text-dark); font-weight: 700; font-size: 0.9rem; }
-  .bottom-nav { display: none; } /* ডেস্কটপে হাইড */
+  .bottom-nav { display: none; }
   .ad-container { margin: 40px 0; display: flex; justify-content: center; align-items: center; }
   .telegram-join-section { background-color: #181818; padding: 40px 20px; text-align: center; margin: 50px -50px 0px -50px; }
   .telegram-join-section .telegram-icon { font-size: 4rem; color: #2AABEE; margin-bottom: 15px; } .telegram-join-section h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--text-light); margin-bottom: 10px; }
@@ -245,24 +246,48 @@ index_html = """
   .telegram-join-button { display: inline-flex; align-items: center; gap: 10px; background-color: #2AABEE; color: white; padding: 12px 30px; border-radius: 50px; font-size: 1.1rem; font-weight: 700; transition: all 0.2s ease; }
   .telegram-join-button:hover { transform: scale(1.05); background-color: #1e96d1; } .telegram-join-button i { font-size: 1.3rem; }
   
-  /* মোবাইল ডিজাইন ( <= 768px) */
+  /* --- মোবাইল ডিজাইন (<= 768px) --- */
   @media (max-width: 768px) {
       body { padding-bottom: var(--nav-height); }
-      .main-nav, .hero-section, .tags-section, .telegram-join-section, .card-info-static { display: none; }
-      .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height); background-color: #181818; border-top: 1px solid #282828; justify-content: space-around; align-items: center; z-index: 200; }
-      .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dark); font-size: 10px; flex-grow: 1; padding: 5px 0; transition: color 0.2s ease; }
-      .nav-item i { font-size: 20px; margin-bottom: 4px; } .nav-item.active { color: var(--text-light); } .nav-item.active i { color: var(--netflix-red); }
+      .main-nav { padding: 10px 15px; }
+      .logo { font-size: 24px; }
+      .search-input { width: 150px; }
       main { padding: 0 15px; }
-      .category-section { margin-top: 30px; }
+      .hero-section { height: 60vh; margin: 0 -15px;}
+      .hero-slide { padding: 15px; align-items: center; } 
+      .hero-content { max-width: 90%; text-align: center; } 
+      .hero-title { font-size: 2.8rem; } 
+      .hero-overview { display: none; }
+      .tags-section { padding: 80px 15px 15px 15px; }
+      .tag-link { padding: 6px 15px; font-size: 0.8rem; }
+      .category-section { margin: 25px 0; }
       .category-title { font-size: 1.2rem; }
+      .full-page-grid-container { padding-top: 80px; padding-bottom: 20px; }
+      .full-page-grid-title { font-size: 1.8rem; }
+      .ad-container { margin: 25px 0; }
+      .telegram-join-section { margin: 50px -15px -30px -15px; display: none; }
       
       /* --- চূড়ান্ত গ্রিড লেআউট (পুরোনো কোডের মতো) --- */
       .category-grid, .full-page-grid {
           grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-          gap: 15px 10px;
+          gap: 20px 12px;
       }
-      .full-page-grid-container { padding-top: 80px; padding-bottom: 20px; } .full-page-grid-title { font-size: 1.8rem; }
-      .ad-container { margin: 25px 0; }
+      .card-info-static { display: none; } /* ডেস্কটপ টাইটেল হাইড */
+      .card-info-mobile { display: block; margin-top: 8px; text-align: center; } /* মোবাইল টাইটেল প্রদর্শন */
+      .card-info-mobile-title {
+          color: #e5e5e5;
+          font-weight: 500;
+          font-size: 0.85rem;
+          line-height: 1.3;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+      }
+      
+      /* বটম নেভিগেশন */
+      .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height); background-color: #181818; border-top: 1px solid #282828; justify-content: space-around; align-items: center; z-index: 200; }
+      .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dark); font-size: 10px; flex-grow: 1; padding: 5px 0; transition: color 0.2s ease; }
+      .nav-item i { font-size: 20px; margin-bottom: 4px; } .nav-item.active { color: var(--text-light); } .nav-item.active i { color: var(--netflix-red); }
   }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
@@ -278,10 +303,15 @@ index_html = """
            {% if m.poster_badge %}<div class="poster-badge" style="font-size: 0.7rem; width: 110px; top:12px; left: -25px;">{{ m.poster_badge }}</div>{% endif %}
            {% if m.vote_average and m.vote_average > 0 %}<div class="rating-badge"><i class="fas fa-star"></i> {{ "%.1f"|format(m.vote_average) }}</div>{% endif %}
         </div>
+        <!-- ডেস্কটপের জন্য -->
         <div class="card-info-static">
           <h4 class="card-info-title">{{ m.title }}</h4>
           {% if m.release_date %}<p class="card-info-meta">{{ m.release_date.split('-')[0] }}</p>{% endif %}
         </div>
+      </div>
+      <!-- মোবাইলের জন্য -->
+      <div class="card-info-mobile">
+          <h4 class="card-info-mobile-title">{{ m.title }}</h4>
       </div>
     </a>
   {% endmacro %}
